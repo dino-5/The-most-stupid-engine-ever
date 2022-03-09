@@ -21,11 +21,17 @@ void ThrowIfFailed(HRESULT hr);
 
 namespace Graphics
 {
-}
+	extern const D3D12_COMMAND_LIST_TYPE comListTypes[];
+	enum class CommandListType 
+	{
+		DIRECT = 0,
+		BUNDLE,
+		COMPUTE,
+		COPY
+	};
 
-namespace DescriptorHeap
-{
-	enum Types
+	extern const D3D12_DESCRIPTOR_HEAP_TYPE descriptorTypes[];
+	enum class DescriptorHeapTypes
 	{
 		RTV = 0 ,
 		SCU,
@@ -33,10 +39,7 @@ namespace DescriptorHeap
 		DSV
 
 	};
-	extern D3D12_DESCRIPTOR_HEAP_TYPE types[];
-
-
-	void CreateDescriptorHeap(ComPtr<ID3D12Device>& device, ComPtr<ID3D12DescriptorHeap>&descHeap, UINT count, Types type, UINT flags = 0);
+	void CreateDescriptorHeap(ComPtr<ID3D12Device>& device, ComPtr<ID3D12DescriptorHeap>&descHeap, UINT count, DescriptorHeapTypes type, UINT flags = 0);
 	
 }
 

@@ -1,29 +1,34 @@
 #pragma once
 #include"commin.h"
+#include"CommandAllocator.h"
 
-template<typename CLType>
-class CommandList 
+namespace Graphics
 {
-private:
-	ComPtr<CLType> m_commandList;
 
-public:
-	CommandList() = default;
-	void Init(ComPtr<ID3D12Device> device, ComPtr<ID3D12CommandAllocator> alloc, ComPtr<ID3D12PipelineState> pso)
+	template<typename CLType>
+	class CommandList 
 	{
-		ThrowIfFailed(device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, alloc.Get(), pso.Get(), IID_PPV_ARGS(&m_commandList)));
-		m_commandList->Close();
-	}
+	private:
+		ComPtr<CLType> m_commandList;
 
-	CLType* Get()
-	{
-		return m_commandList.Get();
-	}
+	public:
+		CommandList() = default;
+		void Init(ComPtr<ID3D12Device> device, CommandAllocator alloc, ComPtr<ID3D12PipelineState> pso )
+		{
+			ThrowIfFailed(device->CreateCommandList(0, alloc.GetType(), alloc.Get(), pso.Get(), IID_PPV_ARGS(&m_commandList)));
+			m_commandList->Close();
+		}
 
-	ComPtr<CLType> operator->()
-	{
-		return m_commandList;
-	}
+		CLType* Get()
+		{
+			return m_commandList.Get();
+		}
 
-};
+		ComPtr<CLType> operator->()
+		{
+			return m_commandList;
+		}
+
+	};
+}
 

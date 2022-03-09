@@ -37,6 +37,7 @@ void Direct12Renderer::Init(UINT width, UINT height)
 		GetDescSize();
 		CreateDescriptors();
 		CreateCommandAllocator();
+        m_commandAllocator = Graphics::CommandAllocator(Graphics::CommandListType::DIRECT, m_device);
 		CreateRootSignature();
 		LoadShaders();
         isInitialized = true;
@@ -249,7 +250,7 @@ void Direct12Renderer::CreateRootSignature()
 
 void Direct12Renderer::CreateDescriptors()
 {
-    DescriptorHeap::CreateDescriptorHeap(m_device, m_RTVDescHeap, m_frameCount, DescriptorHeap::Types::RTV);
+    Graphics::CreateDescriptorHeap(m_device, m_RTVDescHeap, m_frameCount, Graphics::DescriptorHeapTypes::RTV);
     CreateRTV();
 }
 
@@ -266,7 +267,6 @@ void Direct12Renderer::CreateRTV()
 
 void Direct12Renderer::CreateCommandAllocator()
 {
-    ThrowIfFailed(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocator)));
 }
 
 void Direct12Renderer::CreateDescriptorHeap()

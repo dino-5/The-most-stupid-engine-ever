@@ -1,5 +1,6 @@
 #include"commin.h"
 #include"CommandList.h"
+#include"CommandAllocator.h"
 
 constexpr UINT m_frameCount=2;
 
@@ -26,13 +27,12 @@ private:
     ComPtr<IDXGISwapChain3> m_swapChain;
     ComPtr<ID3D12Fence> m_fence;
     ComPtr<ID3D12CommandQueue> m_commandQueue;
-    ComPtr<ID3D12CommandAllocator> m_commandAllocator;
+    Graphics::CommandAllocator m_commandAllocator;
     ComPtr<ID3D12DescriptorHeap> m_RTVDescHeap;
     ComPtr<ID3D12Resource> m_renderTargets[m_frameCount];
     ComPtr<ID3D12RootSignature> m_rootSignature;
     ComPtr<ID3D12PipelineState> m_pso;
-  //  ComPtr<ID3D12GraphicsCommandList> m_commandList;
-    CommandList<ID3D12GraphicsCommandList> m_commandList;
+    Graphics::CommandList<ID3D12GraphicsCommandList> m_commandList;
     CD3DX12_VIEWPORT m_viewport;
     CD3DX12_RECT m_scissorRect;
 

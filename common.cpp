@@ -1,8 +1,8 @@
 #include"commin.h"
 
-namespace DescriptorHeap 
+namespace Graphics 
 {
-	D3D12_DESCRIPTOR_HEAP_TYPE types[] =
+	const D3D12_DESCRIPTOR_HEAP_TYPE descriptorTypes[] =
 	{
 		D3D12_DESCRIPTOR_HEAP_TYPE_RTV	,
 		D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV	,
@@ -11,10 +11,19 @@ namespace DescriptorHeap
 		D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES
 	};
 
-	void CreateDescriptorHeap(ComPtr<ID3D12Device>& device,ComPtr<ID3D12DescriptorHeap>& descHeap, UINT count, Types type, UINT flags )
+	const D3D12_COMMAND_LIST_TYPE comListTypes[] =
+	{
+		
+        D3D12_COMMAND_LIST_TYPE_DIRECT,
+        D3D12_COMMAND_LIST_TYPE_BUNDLE,
+        D3D12_COMMAND_LIST_TYPE_COMPUTE,
+        D3D12_COMMAND_LIST_TYPE_COPY,
+	};
+
+	void CreateDescriptorHeap(ComPtr<ID3D12Device>& device,ComPtr<ID3D12DescriptorHeap>& descHeap, UINT count, DescriptorHeapTypes type, UINT flags )
 	{
 		D3D12_DESCRIPTOR_HEAP_DESC rtvDesc = {};
-		rtvDesc.Type = types[type];
+		rtvDesc.Type = descriptorTypes[static_cast<int>(type)];
 		rtvDesc.NumDescriptors = count;
 		rtvDesc.Flags = (D3D12_DESCRIPTOR_HEAP_FLAGS)flags;
 
