@@ -27,12 +27,12 @@ private:
     ComPtr<IDXGISwapChain3> m_swapChain;
     ComPtr<ID3D12Fence> m_fence;
     ComPtr<ID3D12CommandQueue> m_commandQueue;
-    Graphics::CommandAllocator m_commandAllocator;
+    CommandAllocator m_commandAllocator;
     ComPtr<ID3D12DescriptorHeap> m_RTVDescHeap;
     ComPtr<ID3D12Resource> m_renderTargets[m_frameCount];
     ComPtr<ID3D12RootSignature> m_rootSignature;
     ComPtr<ID3D12PipelineState> m_pso;
-    Graphics::CommandList<ID3D12GraphicsCommandList> m_commandList;
+    CommandList<ID3D12GraphicsCommandList> m_commandList;
     CD3DX12_VIEWPORT m_viewport;
     CD3DX12_RECT m_scissorRect;
 
@@ -50,13 +50,14 @@ private:
     void CreateQueue();
     void CreateSwapChain();
     void CreateDescriptors();
-    void CreateDescriptorHeap();
     void CreateRTV();
     void CreateCommandAllocator();
     void CreateRootSignature();
     void LoadShaders();
     void WaitForPreviousFrame();
     void EnumAdapters();
+	void CreateResource(GraphicsCommandList cl, ComPtr<ID3D12Resource>& res, const void* data, UINT dataSize);
+
     
     Direct12Renderer(UINT width, UINT height);
 public:

@@ -36,6 +36,12 @@
     <ClInclude Include="CommandAllocator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CommandAllocatorPool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandListManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp">
@@ -57,6 +63,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CommandAllocator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandAllocatorPool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandListManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -37,7 +37,7 @@ void Direct12Renderer::Init(UINT width, UINT height)
 		GetDescSize();
 		CreateDescriptors();
 		CreateCommandAllocator();
-        m_commandAllocator = Graphics::CommandAllocator(Graphics::CommandListType::DIRECT, m_device);
+        m_commandAllocator = CommandAllocator(CommandListType::DIRECT, m_device);
 		CreateRootSignature();
 		LoadShaders();
         isInitialized = true;
@@ -90,55 +90,6 @@ void Direct12Renderer::LoadShaders()
     // Command lists are created in the recording state, but there is nothing
     // to record yet. The main loop expects it to be closed, so close it now.
 
-
-    // Create the vertex buffer.
-    {
-        // Define the geometry for a triangle.
-        Vertex triangleVertices[] =
-        {
-            { { 0.25f, 0.25f * m_aspectRatio, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
-            { { 0.25f, -0.25f * m_aspectRatio, 0.5f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
-            { { -0.25f, -0.25f * m_aspectRatio, 0.5f }, { 0.0f, 0.0f, 1.0f, 1.0f } },
-        };
-
-        float indexBuff[] =
-        {
-            0, 1, 2,
-            3, 0, 2
-        };
-
-        const UINT vertexBufferSize = sizeof(triangleVertices);
-        const UINT indexBufferSize= sizeof(indexBuff);
-
-        // Note: using upload heaps to transfer static data like vert buffers is not 
-        // recommended. Every time the GPU needs it, the upload heap will be marshalled 
-        // over. Please read up on Default Heap usage. An upload heap is used here for 
-        // code simplicity and because there are very few verts to actually transfer.
-        auto temp1 = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-        auto temp2 = CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize);
-        ThrowIfFailed(m_device->CreateCommittedResource(
-            &temp1,
-            D3D12_HEAP_FLAG_NONE,
-            &temp2,
-            D3D12_RESOURCE_STATE_GENERIC_READ,
-            nullptr,
-            IID_PPV_ARGS(&m_vertexBuffer)));
-
-        // Copy the triangle data to the vertex buffer.
-        UINT8* pVertexDataBegin;
-        CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.
-        ThrowIfFailed(m_vertexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pVertexDataBegin)));
-        memcpy(pVertexDataBegin, triangleVertices, sizeof(triangleVertices));
-        m_vertexBuffer->Unmap(0, nullptr);
-
-        // Initialize the vertex buffer view.
-        m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
-        m_vertexBufferView.StrideInBytes = sizeof(Vertex);
-        m_vertexBufferView.SizeInBytes = vertexBufferSize;
-
-}
-
-    // Create synchronization objects and wait until assets have been uploaded to the GPU.
     {
         ThrowIfFailed(m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
         m_fenceValue = 1;
@@ -156,7 +107,88 @@ void Direct12Renderer::LoadShaders()
         WaitForPreviousFrame();
     }
 
+    // Create the vertex buffer.
+    {
+        // Define the geometry for a triangle.
+        Vertex triangleVertices[] =
+        {
+            { { 0.25f, 0.25f * m_aspectRatio, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+            { { 0.25f, -0.25f * m_aspectRatio, 0.5f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
+            { { -0.25f, -0.25f * m_aspectRatio, 0.5f }, { 0.0f, 0.0f, 1.0f, 1.0f } },
+            { { -0.25f, 0.25f * m_aspectRatio, 0.5f }, { 0.0f, 0.0f, 1.0f, 1.0f } },
+        };
+
+        UINT indexBuff[] =
+        {
+            0, 1, 2,
+            3, 0, 2
+        };
+
+        const UINT vertexBufferSize = sizeof(triangleVertices);
+        const UINT indexBufferSize= sizeof(indexBuff);
+
+        // Note: using upload heaps to transfer static data like vert buffers is not 
+        // recommended. Every time the GPU needs it, the upload heap will be marshalled 
+        // over. Please read up on Default Heap usage. An upload heap is used here for 
+        // code simplicity and because there are very few verts to actually transfer.
+        CreateResource(m_commandList, m_vertexBuffer, triangleVertices, vertexBufferSize);
+
+        // Initialize the vertex buffer view.
+        m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
+        m_vertexBufferView.StrideInBytes = sizeof(Vertex);
+        m_vertexBufferView.SizeInBytes = vertexBufferSize;
+
+        CreateResource(m_commandList, m_indexBuffer, indexBuff, indexBufferSize);
+        m_indexBufferView.BufferLocation = m_indexBuffer->GetGPUVirtualAddress();
+        m_indexBufferView.SizeInBytes = indexBufferSize;
+        m_indexBufferView.Format = DXGI_FORMAT_R32_UINT;
 }
+    // void CreateResource(CommandList, ComPtr<ID3D12Resource> res, const void* data, size_t dataSize);
+
+    // Create synchronization objects and wait until assets have been uploaded to the GPU.
+
+}
+
+void Direct12Renderer::CreateResource(GraphicsCommandList commandList, ComPtr<ID3D12Resource>& res, const void* data, UINT dataSize)
+{
+	auto heapType = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+	auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(dataSize);
+
+	ThrowIfFailed(m_device->CreateCommittedResource(
+		&heapType,
+		D3D12_HEAP_FLAG_NONE,
+		&resourceDesc,
+		D3D12_RESOURCE_STATE_COPY_DEST,
+		nullptr,
+		IID_PPV_ARGS(&res)));
+
+	heapType = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	ComPtr<ID3D12Resource> intermideateRes;
+	ThrowIfFailed(m_device->CreateCommittedResource(
+		&heapType,
+		D3D12_HEAP_FLAG_NONE,
+		&resourceDesc,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&intermideateRes)));
+
+	D3D12_SUBRESOURCE_DATA subresData = {};
+	subresData.pData = data;
+	subresData.RowPitch = dataSize;
+	subresData.SlicePitch = dataSize;
+
+	ThrowIfFailed(m_commandAllocator->Reset());
+	commandList->Reset(m_commandAllocator.Get(), m_pso.Get());
+
+	UpdateSubresources(commandList.Get(), res.Get(), intermideateRes.Get(), 0, 0, 1, &subresData);
+	auto resourceTransition = CD3DX12_RESOURCE_BARRIER::Transition(res.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_INDEX_BUFFER);
+	commandList->ResourceBarrier(1, &resourceTransition);
+	commandList->Close();
+	ID3D12CommandList* lists[] = {commandList.Get()};
+	m_commandQueue->ExecuteCommandLists(1, lists);
+	WaitForPreviousFrame();
+}
+
 
 void Direct12Renderer::PopulateCommandList()
 
@@ -186,7 +218,8 @@ void Direct12Renderer::PopulateCommandList()
     m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
     m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     m_commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
-    m_commandList->DrawInstanced(3, 1, 0, 0);
+    m_commandList->IASetIndexBuffer(&m_indexBufferView);
+    m_commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
     // Indicate that the back buffer will now be used to present.
     barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
@@ -207,7 +240,6 @@ void Direct12Renderer::Draw()
 
 	// Present the frame.
 	ThrowIfFailed(m_swapChain->Present(1, 0));
-    auto temp = m_fence->GetCompletedValue();
 
 	WaitForPreviousFrame();
 
@@ -250,7 +282,7 @@ void Direct12Renderer::CreateRootSignature()
 
 void Direct12Renderer::CreateDescriptors()
 {
-    Graphics::CreateDescriptorHeap(m_device, m_RTVDescHeap, m_frameCount, Graphics::DescriptorHeapTypes::RTV);
+    CreateDescriptorHeap(m_device, m_RTVDescHeap, m_frameCount, DescriptorHeapTypes::RTV);
     CreateRTV();
 }
 
@@ -269,9 +301,6 @@ void Direct12Renderer::CreateCommandAllocator()
 {
 }
 
-void Direct12Renderer::CreateDescriptorHeap()
-{
-}
 
 void Direct12Renderer::CreateQueue()
 {

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -121,7 +121,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -145,7 +145,9 @@
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="CommandAllocator.h" />
+    <ClInclude Include="CommandAllocatorPool.h" />
     <ClInclude Include="CommandList.h" />
+    <ClInclude Include="CommandListManager.h" />
     <ClInclude Include="commin.h" />
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="Directx12Renderer.h" />
@@ -154,7 +156,9 @@
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="CommandAllocator.cpp" />
+    <ClCompile Include="CommandAllocatorPool.cpp" />
     <ClCompile Include="CommandList.cpp" />
+    <ClCompile Include="CommandListManager.cpp" />
     <ClCompile Include="common.cpp" />
     <ClCompile Include="Directx12Renderer.cpp" />
     <ClCompile Include="Main.cpp" />
