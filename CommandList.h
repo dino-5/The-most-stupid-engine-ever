@@ -15,9 +15,10 @@ private:
 
 public:
 	CommandList() = default;
-	void Init(ComPtr<ID3D12Device> device, CommandAllocator alloc, ComPtr<ID3D12PipelineState> pso )
+	void Init(ComPtr<ID3D12Device> device, CommandAllocator alloc)
 	{
-		ThrowIfFailed(device->CreateCommandList(0, alloc.GetType(), alloc.Get(), pso.Get(), IID_PPV_ARGS(&m_commandList)));
+		// MAYBE ERROR: PSO argument deleted 
+		ThrowIfFailed(device->CreateCommandList(0, alloc.GetType(), alloc.Get(), nullptr, IID_PPV_ARGS(&m_commandList)));
 		m_commandList->Close();
 	}
 
