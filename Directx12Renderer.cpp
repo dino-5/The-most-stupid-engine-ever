@@ -83,7 +83,7 @@ void Direct12Renderer::LoadShaders()
     psoDesc.SampleDesc.Count = 1;
     ThrowIfFailed(m_device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pso)));
 
-    m_commandList.Init(m_device, m_commandAllocator);
+    m_commandList.Init(m_device, m_commandAllocator, m_pso);
     //ThrowIfFailed(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocator.Get(), m_pso.Get(), IID_PPV_ARGS(&m_commandList)));
     //ThrowIfFailed(m_commandList->Close());
 

@@ -1,9 +1,6 @@
-#ifndef DX12RENDERER_H
-#define DX12RENDERER_H
 #include"commin.h"
 #include"CommandList.h"
 #include"CommandAllocator.h"
-#include"CommandAllocatorPool.h"
 
 constexpr UINT m_frameCount=2;
 
@@ -60,7 +57,6 @@ private:
     void WaitForPreviousFrame();
     void EnumAdapters();
 	void CreateResource(GraphicsCommandList cl, ComPtr<ID3D12Resource>& res, const void* data, UINT dataSize);
-    void CreateIndexBuffer();
 
     
     Direct12Renderer(UINT width, UINT height);
@@ -69,11 +65,8 @@ public:
         *this = GetInstance();
     }
     static Direct12Renderer& GetInstance();
-    static ComPtr<ID3D12Device>& GetDevice() { return GetInstance().m_device; }
     
     void Init(UINT width, UINT height);
     void Draw();
     ~Direct12Renderer() = default;
 };
-
-#endif

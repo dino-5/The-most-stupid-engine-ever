@@ -151,7 +151,6 @@
     <ClInclude Include="commin.h" />
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="Directx12Renderer.h" />
-    <ClInclude Include="Engine.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
@@ -162,7 +161,6 @@
     <ClCompile Include="CommandListManager.cpp" />
     <ClCompile Include="common.cpp" />
     <ClCompile Include="Directx12Renderer.cpp" />
-    <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>

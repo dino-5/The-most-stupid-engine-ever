@@ -3,7 +3,6 @@
 #include"commin.h"
 #include"CommandList.h"
 #include"CommandAllocatorPool.h"
-#include"Directx12Renderer.h"
 #include<vector>
 template<typename T>
 class CommandListManager;
@@ -14,11 +13,11 @@ template<typename T>
 class CommandListManager
 {
 private:
-	static inline std::vector<CommandList<T>> m_lists;
+	std::vector<CommandList<T>> m_lists;
 public:
 	CommandListManager()=default;
 	CommandListManager(UINT countListPerThread);
-	CommandList<T>& GetList(FrameId id);
+	CommandList<T>& GetList(ListId id);
 };
 
 #endif

@@ -39,7 +39,6 @@ void CreateDescriptorHeap(ComPtr<ID3D12Device>& device, ComPtr<ID3D12DescriptorH
 
 using AllocatorId = int;
 using ListId= int;
-using FrameId = int;
 
 
 
