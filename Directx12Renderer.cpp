@@ -110,26 +110,6 @@ void Direct12Renderer::LoadShaders()
     // Create the vertex buffer.
     {
         // Define the geometry for a triangle.
-        Vertex triangleVertices[] =
-        {
-            { { 0.25f, 0.25f * m_aspectRatio, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
-            { { 0.25f, -0.25f * m_aspectRatio, 0.5f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
-            { { -0.25f, -0.25f * m_aspectRatio, 0.5f }, { 0.0f, 0.0f, 1.0f, 1.0f } },
-            { { -0.25f, 0.25f * m_aspectRatio, 0.5f }, { 0.0f, 0.0f, 1.0f, 1.0f } },
-        };
-
-        UINT indexBuff[] =
-        {
-            0, 1, 2,
-            3, 0, 2
-        };
-
-        const UINT vertexBufferSize = sizeof(triangleVertices);
-        const UINT indexBufferSize= sizeof(indexBuff);
-        
-
-        m_currentVertexBufferView= CreateVertexBuffer(triangleVertices, vertexBufferSize);
-        m_currentIndexBufferView= CreateIndexBuffer(indexBuff, indexBufferSize);
 }
 }
 
@@ -202,8 +182,6 @@ void Direct12Renderer::PopulateCommandList()
 {
     // fences to determine GPU execution progress.
     ThrowIfFailed(m_commandAllocator->Reset());
-    SetVertexBuffer(m_currentVertexBufferView);
-    SetIndexBuffer(m_currentIndexBufferView);
 
     // However, when ExecuteCommandList() is called on a particular command 
     // list, that command list can then be reset at any time and must be before 

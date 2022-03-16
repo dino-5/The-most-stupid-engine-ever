@@ -11,14 +11,15 @@ struct ResourceBuffer
     T view;
 };
 
+struct Vertex
+{
+	DirectX::XMFLOAT3 position;
+	DirectX::XMFLOAT4 color;
+};
+
 class Direct12Renderer
 {
 private:
-    struct Vertex
-    {
-        DirectX::XMFLOAT3 position;
-        DirectX::XMFLOAT4 color;
-    };
 
     UINT m_width, m_height;
     UINT m_frameIndex=0;

@@ -7,6 +7,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
     const wchar_t* className = L"Directx12";
     const wchar_t* title = L"Directx12";
 
-    App::Init(width, height, className, title, hInstance);
-    return App::Run(nCmdShow);
+    App& app = App::GetApp();
+    app.Init(width, height, className, title, hInstance);
+    return app.Run(nCmdShow);
 }
