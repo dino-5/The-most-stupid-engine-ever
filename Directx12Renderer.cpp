@@ -126,27 +126,36 @@ void Direct12Renderer::LoadShaders()
 
         const UINT vertexBufferSize = sizeof(triangleVertices);
         const UINT indexBufferSize= sizeof(indexBuff);
+        
 
-        // Note: using upload heaps to transfer static data like vert buffers is not 
-        // recommended. Every time the GPU needs it, the upload heap will be marshalled 
-        // over. Please read up on Default Heap usage. An upload heap is used here for 
-        // code simplicity and because there are very few verts to actually transfer.
-        CreateResource(m_commandList, m_vertexBuffer, triangleVertices, vertexBufferSize);
-
-        // Initialize the vertex buffer view.
-        m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
-        m_vertexBufferView.StrideInBytes = sizeof(Vertex);
-        m_vertexBufferView.SizeInBytes = vertexBufferSize;
-
-        CreateResource(m_commandList, m_indexBuffer, indexBuff, indexBufferSize);
-        m_indexBufferView.BufferLocation = m_indexBuffer->GetGPUVirtualAddress();
-        m_indexBufferView.SizeInBytes = indexBufferSize;
-        m_indexBufferView.Format = DXGI_FORMAT_R32_UINT;
+        m_currentVertexBufferView= CreateVertexBuffer(triangleVertices, vertexBufferSize);
+        m_currentIndexBufferView= CreateIndexBuffer(indexBuff, indexBufferSize);
 }
-    // void CreateResource(CommandList, ComPtr<ID3D12Resource> res, const void* data, size_t dataSize);
+}
 
-    // Create synchronization objects and wait until assets have been uploaded to the GPU.
+BufferId Direct12Renderer::CreateIndexBuffer(const void* data, UINT dataSize)
+{
+    m_indexBufferViews.push_back({});
+    auto& obj = m_indexBufferViews.back();
+	CreateResource(m_commandList, obj.res, data, dataSize);
+	obj.view.BufferLocation = obj.res->GetGPUVirtualAddress();
+	obj.view.SizeInBytes = dataSize;
+	obj.view.Format = DXGI_FORMAT_R32_UINT;
+    return m_indexBufferViews.size() - 1;
+}
 
+BufferId Direct12Renderer::CreateVertexBuffer(const void* data, UINT dataSize)
+{
+
+    m_vertexBufferViews.push_back({});
+    auto& obj = m_vertexBufferViews.back();
+	CreateResource(m_commandList, obj.res, data, dataSize);
+
+	// Initialize the vertex buffer view.
+	obj.view.BufferLocation = obj.res->GetGPUVirtualAddress();
+	obj.view.StrideInBytes = sizeof(Vertex);
+	obj.view.SizeInBytes = dataSize;
+    return m_vertexBufferViews.size() - 1;
 }
 
 void Direct12Renderer::CreateResource(GraphicsCommandList commandList, ComPtr<ID3D12Resource>& res, const void* data, UINT dataSize)
@@ -181,8 +190,6 @@ void Direct12Renderer::CreateResource(GraphicsCommandList commandList, ComPtr<ID
 	commandList->Reset(m_commandAllocator.Get(), m_pso.Get());
 
 	UpdateSubresources(commandList.Get(), res.Get(), intermideateRes.Get(), 0, 0, 1, &subresData);
-	auto resourceTransition = CD3DX12_RESOURCE_BARRIER::Transition(res.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_INDEX_BUFFER);
-	commandList->ResourceBarrier(1, &resourceTransition);
 	commandList->Close();
 	ID3D12CommandList* lists[] = {commandList.Get()};
 	m_commandQueue->ExecuteCommandLists(1, lists);
@@ -195,6 +202,8 @@ void Direct12Renderer::PopulateCommandList()
 {
     // fences to determine GPU execution progress.
     ThrowIfFailed(m_commandAllocator->Reset());
+    SetVertexBuffer(m_currentVertexBufferView);
+    SetIndexBuffer(m_currentIndexBufferView);
 
     // However, when ExecuteCommandList() is called on a particular command 
     // list, that command list can then be reset at any time and must be before 
@@ -217,8 +226,8 @@ void Direct12Renderer::PopulateCommandList()
     const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
     m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
     m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    m_commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
-    m_commandList->IASetIndexBuffer(&m_indexBufferView);
+    m_commandList->IASetVertexBuffers(0, 1, &m_vertexBufferViews[m_currentVertexBufferView].view);
+    m_commandList->IASetIndexBuffer(&m_indexBufferViews[m_currentIndexBufferView].view);
     m_commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
     // Indicate that the back buffer will now be used to present.

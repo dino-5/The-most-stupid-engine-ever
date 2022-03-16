@@ -4,6 +4,13 @@
 
 constexpr UINT m_frameCount=2;
 
+template<typename T>
+struct ResourceBuffer
+{
+    ComPtr<ID3D12Resource> res =nullptr;
+    T view;
+};
+
 class Direct12Renderer
 {
 private:
@@ -36,11 +43,12 @@ private:
     CD3DX12_VIEWPORT m_viewport;
     CD3DX12_RECT m_scissorRect;
 
+    std::vector<ResourceBuffer<D3D12_VERTEX_BUFFER_VIEW>> m_vertexBufferViews;
+    std::vector<ResourceBuffer<D3D12_INDEX_BUFFER_VIEW>> m_indexBufferViews;
 
-    D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
-    ComPtr<ID3D12Resource> m_vertexBuffer;
-    D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
-    ComPtr<ID3D12Resource> m_indexBuffer;
+    BufferId m_currentIndexBufferView;
+    BufferId m_currentVertexBufferView;
+
     HANDLE m_fenceEvent;
     
 private:
@@ -65,6 +73,12 @@ public:
         *this = GetInstance();
     }
     static Direct12Renderer& GetInstance();
+
+    BufferId CreateIndexBuffer(const void* data, UINT dataSize);
+    BufferId CreateVertexBuffer( const void* data, UINT dataSize);
+
+    void SetIndexBuffer(BufferId id) { m_currentIndexBufferView = id; }
+    void SetVertexBuffer(BufferId id) { m_currentVertexBufferView= id; }
     
     void Init(UINT width, UINT height);
     void Draw();
